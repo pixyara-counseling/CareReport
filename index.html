@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>報告システム | アグレアーブルサロン</title>
+    <style>
+        /* 基本スタイル：iPhoneでも見やすく、PCでも崩れない設定 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding-bottom: 120px; color: #334155; -webkit-text-size-adjust: 100%; }
+        header { background-color: #1e3a8a; color: white; text-align: center; padding: 1rem; }
+        header h1 { margin: 0; font-size: 1.1rem; }
+        header p { margin: 5px 0 0; font-size: 0.75rem; opacity: 0.9; }
+
+        /* タブメニュー */
+        nav { display: flex; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+        nav button { flex: 1; padding: 15px; border: none; background: none; font-weight: bold; color: #94a3b8; cursor: pointer; font-size: 0.9rem; -webkit-tap-highlight-color: transparent; }
+        nav button.active { color: #2563eb; border-bottom: 3px solid #2563eb; background-color: #eff6ff; }
+
+        main { padding: 10px; max-width: 600px; margin: auto; }
+        .plan-content { display: none; }
+        .plan-content.active { display: block; }
+
+        /* カードデザイン */
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .plan-header { font-size: 1rem; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+        
+        label { display: block; font-size: 0.8rem; font-weight: bold; margin: 10px 0 4px; color: #475569; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        
+        /* サービス内容（チェックボックス） */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .check-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; }
+        .check-item input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
+
+        /* 金額計算エリア */
+        .total-box { background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid #cbd5e1; }
+        .price-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+        .price-input-wrapper { display: flex; align-items: center; gap: 5px; }
+        .price-input-wrapper input { width: 100px; text-align: right; padding: 8px; margin: 0; }
+        .final-total { border-top: 2px solid #cbd5e1; margin-top: 10px; padding-top: 10px; font-weight: bold; color: #1e40af; font-size: 1.2rem; }
+
+        /* 履歴一覧 */
+        .history-section { margin-top: 20px; padding: 10px; border-top: 2px dashed #cbd5e1; }
+        .history-card { background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.85rem; position: relative; }
+        .delete-btn { position: absolute; top: 12px; right: 12px; color: #ef4444; border: none; background: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+
+        /* 下部固定ボタン */
+        footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 15px; display: flex; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-gray { background-color: #e2e8f0; color: #475569; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>サービス実施報告システム</h1>
+    <p>アグレアーブルサロン 山田友紀</p>
+</header>
+
+<nav>
+    <button onclick="switchTab('A')" id="tabA" class="active">プランA</button>
+    <button onclick="switchTab('B')" id="tabB">プランB</button>
+    <button onclick="switchTab('C')" id="tabC">プランC</button>
+</nav>
+
+<main>
+    <div id="contentA" class="plan-content active">
+        <div class="card">
+            <div class="plan-header" style="color: #1e40af;">プランA: 単発プラン</div>
+            <label>利用者様名</label><input type="text" id="A_name" placeholder="様">
+            <label>実施日</label><input type="date" id="A_date">
+            <label>担当スタッフ</label><input type="text" id="A_staff">
+            
+            <label>【サービス実施内容】</label>
+            <div class="grid">
+                <label class="check-item"><input type="checkbox" class="A_srv" value="買い物同行"> 買い物同行</label>
+                <label class="check-item"><input type="checkbox" class="A_srv" value="安否確認"> 安否確認</label>
+                <label class="check-item"><input type="checkbox" class="A_srv" value="ごみ出し"> ごみ出し</label>
+                <label class="check-item"><input type="checkbox" class="A_srv" value="美容院・墓参り"> 美容院・墓参り</label>
+                <label class="check-item"><input type="checkbox" class="A_srv" value="薬受取"> 薬受取</label>
+                <label class="check-item"><input type="checkbox" class="A_srv" value="片付け"> 片付け</label>
+            </div>
+
+            <label>【実施時間記録】</label>
+            <div style="display:flex; gap:10px; align-items:center;"><input type="time" id="A_start"> ～ <input type="time" id="A_end"></div>
+
+            <label>【特記事項・備考欄】</label>
+            <textarea id="A_memo" rows="3"></textarea>
+
+            <div class="total-box">
+                <div class="price-row"><span>基本料金</span><div class="price-input-wrapper"><input type="number" class="val-A" oninput="calcTotal('A')">円</div></div>
+                <div class="price-row"><span>延長料金</span><div class="price-input-wrapper"><input type="number" class="val-A" oninput="calcTotal('A')">円</div></div>
+                <div class="price-row"><span>交通費</span><div class="price-input-wrapper"><input type="number" class="val-A" oninput="calcTotal('A')">円</div></div>
+                <div class="price-row"><span>時間帯加算</span><div class="price-input-wrapper"><input type="number" class="val-A" oninput="calcTotal('A')">円</div></div>
+                <div class="price-row"><span>その他</span><div class="price-input-wrapper"><input type="number" class="val-A" oninput="calcTotal('A')">円</div></div>
+                <div class="price-row final-total"><span>合計金額</span><span>¥<span id="A_total">0</span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contentB" class="plan-content">
+        <div class="card">
+            <div class="plan-header" style="color: #166534;">プランB: 定額制プラン</div>
+            <label>利用者様名</label><input type="text" id="B_name">
+            <label>記録日</label><input type="date" id="B_date">
+            <label>担当スタッフ</label><input type="text" id="B_staff">
+
+            <label>【活動内容】</label>
+            <div class="grid">
+                <label class="check-item"><input type="checkbox" class="B_srv" value="買い物同行"> 買い物同行</label>
+                <label class="check-item"><input type="checkbox" class="B_srv" value="美容院・墓参り"> 美容院・墓参り</label>
+                <label class="check-item"><input type="checkbox" class="B_srv" value="安否確認"> 安否確認</label>
+                <label class="check-item"><input type="checkbox" class="B_srv" value="薬受取"> 薬受取</label>
+                <label class="check-item"><input type="checkbox" class="B_srv" value="ごみ出し"> ごみ出し</label>
+                <label class="check-item"><input type="checkbox" class="B_srv" value="片付け"> 片付け</label>
+            </div>
+
+            <label>【利用時間記録】</label>
+            <div style="display:flex; gap:10px; align-items:center;"><input type="time" id="B_start"> ～ <input type="time" id="B_end"></div>
+
+            <label>【状況報告・備考欄】</label>
+            <textarea id="B_memo" rows="3"></textarea>
+
+            <div class="total-box">
+                <div class="price-row"><span>交通費</span><div class="price-input-wrapper"><input type="number" class="val-B" oninput="calcTotal('B')">円</div></div>
+                <div class="price-row"><span>時間帯加算</span><div class="price-input-wrapper"><input type="number" class="val-B" oninput="calcTotal('B')">円</div></div>
+                <div class="price-row"><span>家族電話相談</span><div class="price-input-wrapper"><input type="number" class="val-B" oninput="calcTotal('B')">円</div></div>
+                <div class="price-row final-total"><span>合計精算額</span><span>¥<span id="B_total">0</span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contentC" class="plan-content">
+        <div class="card">
+            <div class="plan-header" style="color: #6b21a8;">プランC: パックプラン</div>
+            <label>利用者様名</label><input type="text" id="C_name">
+            <label>実施日</label><input type="date" id="C_date">
+            <label>選択パック</label>
+            <select id="C_pack">
+                <option value="病院受診">病院受診 (16,000円)</option>
+                <option value="お出かけ">お出かけ (15,000円)</option>
+                <option value="定期訪問">定期訪問 (30,000円〜)</option>
+            </select>
+            <label>目的地・受診科目等</label><input type="text" id="C_dest">
+            <label>【時間記録】</label>
+            <div style="display:flex; gap:10px; align-items:center;"><input type="time" id="C_start"> ～ <input type="time" id="C_end"></div>
+
+            <label>【活動詳細・備考欄】</label>
+            <textarea id="C_memo" rows="3"></textarea>
+
+            <div class="total-box">
+                <div class="price-row"><span>延長料金</span><div class="price-input-wrapper"><input type="number" class="val-C" oninput="calcTotal('C')">円</div></div>
+                <div class="price-row"><span>交通費</span><div class="price-input-wrapper"><input type="number" class="val-C" oninput="calcTotal('C')">円</div></div>
+                <div class="price-row"><span>その他加算</span><div class="price-input-wrapper"><input type="number" class="val-C" oninput="calcTotal('C')">円</div></div>
+                <div class="price-row final-total"><span>合計精算額</span><span>¥<span id="C_total">0</span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3 style="font-size: 0.9rem;">最近の記録履歴（ブラウザ保存）</h3>
+        <div id="historyList"></div>
+    </div>
+</main>
+
+<footer>
+    <button class="btn btn-gray" onclick="window.location.reload()">リセット</button>
+    <button class="btn btn-blue" onclick="saveData()">保存してJSON出力</button>
+</footer>
+
+<script>
+    let currentTab = 'A';
+
+    function switchTab(p) {
+        currentTab = p;
+        document.querySelectorAll('.plan-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('content' + p).classList.add('active');
+        document.getElementById('tab' + p).classList.add('active');
+    }
+
+    // 合計金額の計算（iPhone対応：oninputで即座に実行される）
+    function calcTotal(p) {
+        let sum = 0;
+        document.querySelectorAll('.val-' + p).forEach(input => {
+            sum += Number(input.value) || 0;
+        });
+        document.getElementById(p + '_total').innerText = sum.toLocaleString();
+    }
+
+    // データの保存とファイル出力
+    function saveData() {
+        const name = document.getElementById(currentTab + '_name').value;
+        const date = document.getElementById(currentTab + '_date').value;
+        const total = document.getElementById(currentTab + '_total').innerText;
+
+        if (!name || !date) {
+            alert("利用者名と日付を入力してください。");
+            return;
+        }
+
+        // サービス内容の取得
+        let services = [];
+        document.querySelectorAll('.' + currentTab + '_srv:checked').forEach(cb => services.push(cb.value));
+
+        const record = {
+            plan: "プラン" + currentTab,
+            name: name,
+            date: date,
+            services: services,
+            total: total,
+            memo: document.getElementById(currentTab + '_memo').value,
+            timestamp: new Date().toLocaleString()
+        };
+
+        // 1. ローカル履歴に保存
+        const history = JSON.parse(localStorage.getItem('agreable_reports_v5') || '[]');
+        history.push(record);
+        localStorage.setItem('agreable_reports_v5', JSON.stringify(history));
+
+        // 2. JSONファイルとしてダウンロード
+        const blob = new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Report_${name}_${date}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        updateHistoryView();
+        alert("保存しました。");
+    }
+
+    // 履歴一覧の更新
+    function updateHistoryView() {
+        const history = JSON.parse(localStorage.getItem('agreable_reports_v5') || '[]');
+        const list = document.getElementById('historyList');
+        list.innerHTML = history.length ? '' : '<p style="color:#94a3b8; font-size:0.8rem;">履歴はありません</p>';
+        
+        // 新しい順に10件表示
+        history.slice().reverse().forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deleteHistory(${history.length - 1 - idx})">×</button>
+                <strong>${item.date} | ${item.name} 様</strong><br>
+                ${item.plan} / 合計: ¥${item.total}<br>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:5px; border-top:1px solid #eee; padding-top:5px;">備考: ${item.memo || 'なし'}</div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function deleteHistory(index) {
+        if (!confirm("この履歴を削除しますか？")) return;
+        const history = JSON.parse(localStorage.getItem('agreable_reports_v5') || '[]');
+        history.splice(index, 1);
+        localStorage.setItem('agreable_reports_v5', JSON.stringify(history));
+        updateHistoryView();
+    }
+
+    // 起動時に履歴を表示
+    window.onload = updateHistoryView;
+</script>
+</body>
+</html>
